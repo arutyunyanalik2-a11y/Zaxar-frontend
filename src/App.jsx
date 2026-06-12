@@ -1,8 +1,13 @@
 import Chat from "./Chat";
-
+import { Analytics } from "@vercel/analytics/next";
 
 function App() {
-  return <Chat />;
+  return (
+    <>
+      <Chat />
+      <Analytics />
+    </>
+  );
 }
 
 export default App;
