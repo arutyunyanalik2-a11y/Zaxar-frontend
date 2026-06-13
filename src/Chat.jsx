@@ -528,15 +528,22 @@ export default function Chat() {
                                 accept="image/*"
                             />
 
-                            <input
+                             <textarea
                                 className="chat-field"
-                                type="text"
                                 value={input}
                                 onChange={(e) => setInput(e.target.value)}
-                                onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                                placeholder={isListening ? "Слушаю вас..." : "Напишите сообщение Захару..."}
+                                onKeyDown={(e) => {
+                                   
+                                    if (e.key === 'Enter' && !e.shiftKey) {
+                                        e.preventDefault();
+                                        handleSend();
+                                    }
+                                }}
+                                placeholder={isListening ? "Слушаю вас..." : "Напишите сообщение..."}
                                 disabled={isLoading}
+                                rows={1}
                             />
+
 
                             <button onClick={toggleListening} disabled={isLoading} className={`mic-btn ${isListening ? 'listening' : ''}`}>
                                 {isListening ? <FaStop size={16} /> : <FaMicrophone size={16} />}
