@@ -1428,3 +1428,104 @@
             8px 6px 20px rgba(255, 142, 12, 0.8);
     }
 }
+
+/* ==========================================================================
+   ГЛАВНЫЕ СТИЛИ ДЛЯ КОМПЬЮТЕРА (Твой любимый оригинал)
+   ========================================================================== */
+.chat-field {
+    flex-grow: 1;
+    background-color: #27272a;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px; 
+    color: #ffffff;
+    padding: 16px 20px;  
+    font-size: 1rem;     
+    outline: none;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* Авторасширение текста */
+    resize: none;
+    -webkit-appearance: none;
+    field-sizing: content;
+    overflow-y: auto;
+}
+
+/* СВЕРХВАЖНО: Магия для плейсхолдера */
+.chat-field::placeholder {
+    white-space: nowrap;     /* ЖЕСТКО: Плейсхолдер ВСЕГДА стоит строго в одну строку и не уходит вниз */
+    overflow: hidden;        /* Прячет хвостик, если экран смартфона совсем крошечный */
+    text-overflow: ellipsis; /* Ставит аккуратное троеточие в конце плейсхолдера, если он не влезает */
+    color: #a1a1aa;          /* Приятный благородный цвет подсказки */
+    opacity: 0.6;
+}
+
+/* Твой фокус для ПК */
+.chat-field:focus {
+    border-color: rgba(59, 130, 246, 0.5);
+    background-color: #27272a;
+    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.15);
+}
+
+/* Базовые кнопки для ПК */
+.attach-btn, .mic-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    color: #a1a1aa;
+    cursor: pointer;
+    transition: color 0.2s ease;
+    padding: 12px;
+}
+.attach-btn:hover, .mic-btn:hover {
+    color: #ffffff;
+}
+
+
+/* ==========================================================================
+   МЕДИA ДЛЯ ТЕЛЕФОНОВ (До 768px) — Изящный, тонкий и широкий инпут
+   ========================================================================== */
+@media (max-width: 768px) {
+    .chat-input-area {
+        display: flex;
+        align-items: flex-end; /* Кнопки прижаты к низу, пока инпут растет вверх */
+        gap: 6px;
+        flex-shrink: 0;
+        margin-bottom: 10px;
+        width: calc(100% - 16px); 
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .chat-field {
+        /* Ширина раздвинута на максимум */
+        flex-grow: 1;
+        width: 0;
+        max-width: none; 
+        
+        /* Идеальная приземистая высота */
+        padding: 8px 12px;   /* Тонкие аккуратные отступы */
+        font-size: 16px;     /* Защита от авто-зума на iOS */
+        line-height: 1.4;    /* Высота строки */
+        border-radius: 10px; /* Эстетичный радиус */
+        
+        /* ИСПРАВЛЕНО: Динамический лимит на 5 строк. После этого появляется скролл */
+        max-height: calc(1.4em * 5 + 16px); 
+    }
+    
+    /* Кнопки на мобилке вровень с тонким инпутом */
+    .attach-btn, .mic-btn, .send-btn {
+        width: 34px; 
+        height: 34px;
+        border-radius: 8px;
+        padding: 0;
+        margin-bottom: 2px;
+    }
+    
+    .send-btn svg {
+        width: 14px;
+        height: 14px;
+    }
+}
