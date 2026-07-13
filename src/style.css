@@ -1540,7 +1540,7 @@
 
 
 .dumSpan {
-    margin-top: 5px;
+
     margin-left: 15px;
     animation: digitalGlow 4s ease-in-out infinite alternate; /* Увеличим время для более плавного эффекта */
     color: #fff; /* Базовый цвет текста для усиления эффекта свечения */
