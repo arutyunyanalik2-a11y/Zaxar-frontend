@@ -60,7 +60,7 @@
     justify-content: center;
     gap: 8px;
     color: white;
-    background: linear-gradient(120deg, rgba(0, 112, 209, 1) 0%, rgba(217, 169, 169, 1) 54%, rgba(255, 157, 0, 1) 100%);
+    background: linear-gradient(120deg, rgb(17, 0, 255) 0%, rgba(217, 169, 169, 1) 54%, rgba(255, 157, 0, 1) 100%);
     border: none;
     padding: 12px;
     border-radius: 8px;
@@ -321,7 +321,7 @@
 }
 
 .chat-messages-area::-webkit-scrollbar-thumb {
-    background: linear-gradient(120deg, rgba(0, 112, 209, 1) 0%, rgba(217, 169, 169, 1) 54%, rgba(255, 157, 0, 1) 100%);
+    background: linear-gradient(120deg, rgb(17, 0, 255) 0%, rgba(217, 169, 169, 1) 54%, rgba(255, 157, 0, 1) 100%);
     border-radius: 10px;
     
 }
