@@ -1395,12 +1395,15 @@
     }
 }
 
-.dumAI{
+.dumAI {
     width: 40px;
+    height: 40px; 
     border-radius: 50%;
+    object-fit: cover; 
     animation: rotateShadow 3s linear infinite;
-
+    box-sizing: border-box;
 }
+
 
 @keyframes rotateShadow {
     0% {
