@@ -1528,3 +1528,9 @@
         height: 14px;
     }
 }
+
+.theme-light .chat-field {
+    background: #f1f5f9;
+    color: #000000;
+    border: 1px solid #cbd5e1;
+}
