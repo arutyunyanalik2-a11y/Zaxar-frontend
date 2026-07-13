@@ -491,13 +491,11 @@ export default function Chat() {
 
                         {isLoading && (
                             <div className="message-row ai">
-                                {/* <div className="message-bubble loading-bubble"> */}
+
                                     <img className='dumAI' src={zaxar} alt="" />
-                                    {/* <span className="dot"></span>
-                                    <span className="dot"></span>
-                                    <span className="dot"></span>
-                                    <span className="dot"></span> */}
-                                {/* </div> */}
+                                   <span className='dumSpan'>пожалуйста подождите ищу в интернете</span>
+
+
                             </div>
                         )}
                         <div ref={messagesEndRef} />
