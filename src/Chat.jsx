@@ -285,24 +285,37 @@ export default function Chat() {
             setIsImageMode(false);
 
             try {
+                // 1. Защита от зависания мобильной сети (таймаут 50 секунд)
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 50000);
+
                 const response = await fetch("https://zaxar-backend.onrender.com/api/generate-image", {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ prompt: userText })
+                    body: JSON.stringify({ prompt: userText }),
+                    signal: controller.signal
                 });
 
+                clearTimeout(timeoutId);
+
+                // 2. Сначала проверяем HTTP-статус сервера
+                if (!response.ok) {
+                    throw new Error(`Сервер вернул статус: ${response.status}`);
+                }
+
+                // 3. Безопасное чтение JSON только при успешном ответе
                 const data = await response.json();
 
-                if (!response.ok || !data.image) {
+                if (!data || !data.image) {
                     const errorMessage = {
                         id: Date.now() + '-err',
                         sender: 'ai',
-                        text: "Не удалось сгенерировать изображение: " + (data.error || "Внутренняя ошибка сервера"),
+                        text: "Не удалось сгенерировать изображение: " + (data?.error || "Пустой ответ от сервера"),
                         audioUrl: null,
                         feedback: null
                     };
                     setChats(prev => prev.map(chat =>
-                        chat.id === activeChatId ? { ...chat, messages: [...chat.messages, errorMessage] } : chat
+                        chat.id === activeChatId ? { ...chat, messages: [...(chat.messages || []), errorMessage] } : chat
                     ));
                 } else {
                     const aiMessage = {
@@ -313,24 +326,35 @@ export default function Chat() {
                         feedback: null
                     };
                     setChats(prev => prev.map(chat =>
-                        chat.id === activeChatId ? { ...chat, messages: [...chat.messages, aiMessage] } : chat
+                        chat.id === activeChatId ? { ...chat, messages: [...(chat.messages || []), aiMessage] } : chat
                     ));
                 }
             } catch (error) {
-                console.error("Ошибка сети:", error);
+                console.error("Ошибка сети или сервера:", error);
+
+                let failText = "Ошибка подключения к серверу генерации изображений.";
+                if (error.name === 'AbortError') {
+                    failText = "Превышено время ожидания. Мобильная сеть работает слишком медленно.";
+                }
+
                 const errorMessage = {
                     id: Date.now() + '-err',
                     sender: 'ai',
-                    text: "Ошибка подключения к серверу генерации изображений.",
+                    text: failText,
                     audioUrl: null,
                     feedback: null
                 };
+
                 setChats(prev => prev.map(chat =>
-                    chat.id === activeChatId ? { ...chat, messages: [...chat.messages, errorMessage] } : chat
+                    chat.id === activeChatId ? { ...chat, messages: [...(chat.messages || []), errorMessage] } : chat
                 ));
             } finally {
                 setIsImageGenerating(false);
             }
+
+
+
+
         } else {
             setIsLoading(true);
             try {
