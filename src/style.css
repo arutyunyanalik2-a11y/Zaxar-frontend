@@ -11,6 +11,7 @@
     overflow: hidden;
     box-sizing: border-box;
     transition: padding 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
 }
 
 /* ==========================================================================
@@ -75,7 +76,33 @@
     background-color: #e3e3e3;
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+    /* animation: newchat 1.5s 1; */
 }
+
+
+/* @keyframes newchat {
+    0% {
+        box-shadow: -6px -4px 20px rgba(48, 12, 255, 0.8),
+            6px 4px 20px rgba(255, 142, 12, 0.8);
+    }
+
+    25% {
+        box-shadow: 6px -4px 20px rgba(48, 12, 255, 0.8),
+            -6px 4px 20px rgba(255, 142, 12, 0.8);
+    }
+
+    50% {
+        box-shadow: 6px 4px 20px rgba(48, 12, 255, 0.8),
+            -6px -4px 20px rgba(255, 142, 12, 0.8);
+    }
+
+    100% {
+        box-shadow: none;
+    }
+} */
+
+
+
 
 .new-chat-btn:active {
     transform: translateY(1px);
@@ -108,6 +135,10 @@
     font-weight: 600;
     letter-spacing: 0.5px;
 }
+
+
+
+
 
 .sidebar-menu {
     flex-grow: 1;
@@ -323,7 +354,7 @@
 .chat-messages-area::-webkit-scrollbar-thumb {
     background: linear-gradient(120deg, rgb(17, 0, 255) 0%, rgba(217, 169, 169, 1) 54%, rgba(255, 157, 0, 1) 100%);
     border-radius: 10px;
-    
+
 }
 
 .message-row {
@@ -777,6 +808,7 @@
     .chat-field {
         padding: 12px 14px;
         border-radius: 12px;
+
     }
 
     .mic-btn,
@@ -1025,7 +1057,7 @@
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
     border: 1px solid #334155;
     box-shadow: -8px -6px 20px rgba(48, 12, 255, 0.8),
-    8px 6px 20px rgba(255, 142, 12, 0.8);
+        8px 6px 20px rgba(255, 142, 12, 0.8);
     /* Анимация плавного появления из центра */
     animation: modalReveal 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
@@ -1183,13 +1215,13 @@
 }
 
 .theme-light .chat-field {
-    background-color: #f1f5f9;
+    background: #f1f5f9;
     color: #000000;
     border: 1px solid #cbd5e1;
 }
 
 .theme-light .chat-field::placeholder {
-    color: #64748b;
+    color: #94a2b6;
 }
 
 .theme-light .header-settings-btn {
@@ -1397,13 +1429,12 @@
 
 .dumAI {
     width: 40px;
-    height: 40px; 
+    height: 40px; /* Устанавливаем высоту, равную ширине, для создания идеального квадрата */
     border-radius: 50%;
-    object-fit: cover; 
+    object-fit: cover; /* Гарантирует, что изображение заполнит круг, сохраняя пропорции и обрезая лишнее */
     animation: rotateShadow 3s linear infinite;
     box-sizing: border-box;
 }
-
 
 @keyframes rotateShadow {
     0% {
@@ -1432,6 +1463,192 @@
     }
 }
 
+
+/* Контейнер-ссылка для правильного клика и анимации взлета */
+.zaxar-plus-link {
+    display: inline-block;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    -webkit-tap-highlight-color: transparent;
+    /* Убирает синюю рамку при клике на смартфонах */
+}
+
+/* Сама кнопка-значок (Захар Плюс) */
+.zaxar-plus-badge {
+    /* width: 65px; */
+    /* height: 65px; */
+    padding: 5px;
+    margin-right: 5px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+
+    /* Эффект дорогого темного стекла */
+    background: rgba(15, 12, 32, 0.8);
+    backdrop-filter: blur(8px);
+
+    /* Плавная градиентная рамка (Твои цвета: синий -> оранжевый) */
+    border: 2px solid transparent;
+    background-image: linear-gradient(rgba(15, 12, 32, 0.8), rgba(15, 12, 32, 0.8)),
+        linear-gradient(135deg, rgba(0, 112, 209, 1) 0%, rgba(255, 157, 0, 1) 100%);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+
+    /* Запуск бесконечного неонового свечения вокруг значка */
+    animation: neonPulseGlow 3s ease-in-out infinite alternate;
+    transition: all 0.3s ease;
+}
+
+/* Стиль самого значка (Молния или Плюс внутри) */
+.zaxar-plus-icon {
+    font-size: 15px;
+    font-weight: 800;
+    /* Делаем сам значок градиентным под стиль Захар Плюс */
+    background: linear-gradient(135deg, #ffffff 30%, rgba(255, 157, 0, 1) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 2px 8px rgba(255, 157, 0, 0.5));
+    user-select: none;
+    transition: transform 0.3s ease;
+}
+
+/* ==========================================
+   ИНТЕРАКТИВНОСТЬ (HOVER / ACTIVE)
+   ========================================== */
+
+/* При наведении вся кнопка плавно увеличивается */
+.zaxar-plus-link:hover {
+    transform: scale(1.05);
+}
+
+.zaxar-plus-link:hover .zaxar-plus-badge {
+    /* При ховере свечение усиливается, показывая, что кнопка активна */
+    box-shadow: 0 0 25px rgba(255, 157, 0, 0.6),
+        inset 0 0 10px rgba(0, 112, 209, 0.4);
+    animation-duration: 1.5s;
+    /* Ускоряем пульсацию при наведении */
+}
+
+/* При наведении сам значок внутри делает легкий микро-поворот */
+/* .zaxar-plus-link:hover .zaxar-plus-icon {
+    transform: scale(1.1) rotate(10deg);
+} */
+
+/* Физический отклик на нажатие (кнопка вдавливается) */
+.zaxar-plus-link:active {
+    transform: scale(0.94);
+}
+
+
+/* ==========================================
+   БЕСКОНЕЧНАЯ НЕОНОВАЯ АНИМАЦИЯ
+   Плавно переливает мягкое свечение вокруг значка
+   ========================================== */
+@keyframes neonPulseGlow {
+    0% {
+        box-shadow: 0 0 12px rgba(0, 112, 209, 0.4),
+            inset 0 0 4px rgba(0, 112, 209, 0.2);
+    }
+
+    50% {
+        box-shadow: 0 0 18px rgba(140, 130, 200, 0.5),
+            inset 0 0 6px rgba(140, 130, 200, 0.3);
+    }
+
+    100% {
+        box-shadow: 0 0 22px rgba(255, 157, 0, 0.5),
+            inset 0 0 8px rgba(255, 157, 0, 0.3);
+    }
+}
+
+/* ==========================================
+   АДАПТИВНОСТЬ ДЛЯ МОБИЛЬНЫХ ТЕЛЕФОНОВ
+   ========================================== */
+@media (max-width: 430px) {
+    .zaxar-plus-badge {
+        width: 55px;
+        /* Чуть уменьшаем размер на iPhone/Samsung, чтобы кнопка аккуратно сидела в углу */
+        height: 55px;
+    }
+
+    .zaxar-plus-icon {
+        font-size: 22px;
+    }
+}
+
+/* ==========================================
+   АДАПТИВНОСТЬ ДЛЯ ВСЕХ МОБИЛЬНЫХ УСТРОЙСТВ
+   ========================================== */
+
+/* 1. СМАРТФОНЫ С БОЛЬШИМ И СРЕДНИМ ЭКРАНОМ 
+   (iPhone 14/15/16 Pro Max, Plus, Samsung Galaxy Ultra, Fold и др. до 430px) */
+@media (max-width: 430px) {
+    .zaxar-plus-badge {
+        /* Убираем фиксированные размеры, работаем аккуратными отступами */
+        width: auto;
+        height: auto;
+        padding: 4px 8px;
+        /* Оптимальный компактный размер для мобильной строки */
+        margin-right: 8px;
+        /* Чуть прижимаем к соседнему элементу */
+        border-radius: 12px;
+        /* Пропорционально скругляем под меньший размер */
+    }
+
+    .zaxar-plus-icon {
+        font-size: 13px;
+        /* Изящно уменьшаем иконку, чтобы она смотрелась органично */
+    }
+}
+
+/* 2. МИКРО-СМАРТФОНЫ И КОМПАКТНЫЕ ЭКРАНЫ
+   (iPhone SE, старые модели или кастомные мелкие сетки до 340px) */
+@media (max-width: 340px) {
+    .zaxar-plus-badge {
+        padding: 3px 6px;
+        margin-right: 5px;
+        border-radius: 10px;
+    }
+
+    .zaxar-plus-icon {
+        font-size: 11px;
+    }
+}
+
+/* 3. ЗАЩИТА ОТ ЗАЛИПАНИЯ ХОВЕРА НА СЕНСОРНЫХ ЭКРАНАХ (Apple / Android)
+   Этот хак разделяет поведение мышки на ПК и тапа пальцем на телефоне.
+   Эффект увеличения (scale) сработает ТОЛЬКО там, где есть реальный курсор. */
+@media (hover: none) {
+
+    /* Отменяем увеличение всей ссылки при простом касании экрана */
+    .zaxar-plus-link:hover {
+        transform: none;
+    }
+
+    /* Отменяем усиление теней при простом касании */
+    .zaxar-plus-link:hover .zaxar-plus-badge {
+        box-shadow: 0 0 12px rgba(0, 112, 209, 0.4),
+            inset 0 0 4px rgba(0, 112, 209, 0.2);
+        animation-duration: 3s;
+        /* Возвращаем стандартную скорость пульсации */
+    }
+
+    /* Взамен ховера делаем сочный отклик на РЕАЛЬНОЕ НАЖАТИЕ пальцем (Active) */
+    .zaxar-plus-link:active {
+        transform: scale(0.92);
+        /* Кнопка приятно пружинит под пальцем */
+    }
+
+    .zaxar-plus-link:active .zaxar-plus-badge {
+        box-shadow: 0 0 20px rgba(255, 157, 0, 0.6);
+        /* Вспышка в момент нажатия */
+    }
+}
+
+
 /* ==========================================================================
    ГЛАВНЫЕ СТИЛИ ДЛЯ КОМПЬЮТЕРА (Твой любимый оригинал)
    ========================================================================== */
@@ -1439,14 +1656,14 @@
     flex-grow: 1;
     background-color: #27272a;
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 16px; 
+    border-radius: 16px;
     color: #ffffff;
-    padding: 16px 20px;  
-    font-size: 1rem;     
+    padding: 16px 20px;
+    font-size: 1rem;
     outline: none;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    
+
     /* Авторасширение текста */
     resize: none;
     -webkit-appearance: none;
@@ -1456,10 +1673,14 @@
 
 /* СВЕРХВАЖНО: Магия для плейсхолдера */
 .chat-field::placeholder {
-    white-space: nowrap;     /* ЖЕСТКО: Плейсхолдер ВСЕГДА стоит строго в одну строку и не уходит вниз */
-    overflow: hidden;        /* Прячет хвостик, если экран смартфона совсем крошечный */
-    text-overflow: ellipsis; /* Ставит аккуратное троеточие в конце плейсхолдера, если он не влезает */
-    color: #a1a1aa;          /* Приятный благородный цвет подсказки */
+    white-space: nowrap;
+    /* ЖЕСТКО: Плейсхолдер ВСЕГДА стоит строго в одну строку и не уходит вниз */
+    overflow: hidden;
+    /* Прячет хвостик, если экран смартфона совсем крошечный */
+    text-overflow: ellipsis;
+    /* Ставит аккуратное троеточие в конце плейсхолдера, если он не влезает */
+    color: #a1a1aa;
+    /* Приятный благородный цвет подсказки */
     opacity: 0.6;
 }
 
@@ -1471,7 +1692,8 @@
 }
 
 /* Базовые кнопки для ПК */
-.attach-btn, .mic-btn {
+.attach-btn,
+.mic-btn {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1482,21 +1704,29 @@
     transition: color 0.2s ease;
     padding: 12px;
 }
-.attach-btn:hover, .mic-btn:hover {
+
+.attach-btn:hover,
+.mic-btn:hover {
     color: #ffffff;
 }
 
 
-/* ==========================================================================
-   МЕДИA ДЛЯ ТЕЛЕФОНОВ (До 768px) — Изящный, тонкий и широкий инпут
-   ========================================================================== */
+
+
+
+
+
+
+
 @media (max-width: 768px) {
     .chat-input-area {
         display: flex;
-        align-items: flex-end; /* Кнопки прижаты к низу, пока инпут растет вверх */
+        align-items: flex-end;
+        /* Кнопки прижаты к низу, пока инпут растет вверх */
         gap: 6px;
         flex-shrink: 0;
         margin-bottom: 10px;
+        /* width: calc(100% - 16px);  */
         margin-left: auto;
         margin-right: auto;
     }
@@ -1505,32 +1735,40 @@
         /* Ширина раздвинута на максимум */
         flex-grow: 1;
         width: 0;
-        max-width: none; 
-        
+        max-width: none;
+
         /* Идеальная приземистая высота */
-        padding: 8px 12px;   /* Тонкие аккуратные отступы */
-        font-size: 16px;     /* Защита от авто-зума на iOS */
-        line-height: 1.4;    /* Высота строки */
-        border-radius: 10px; /* Эстетичный радиус */
-        
+        padding: 8px 12px;
+        /* Тонкие аккуратные отступы */
+        font-size: 16px;
+        /* Защита от авто-зума на iOS */
+        line-height: 1.4;
+        /* Высота строки */
+        border-radius: 10px;
+        /* Эстетичный радиус */
+
         /* ИСПРАВЛЕНО: Динамический лимит на 5 строк. После этого появляется скролл */
-        max-height: calc(1.4em * 5 + 16px); 
+        max-height: calc(1.4em * 5 + 16px);
     }
-    
+
     /* Кнопки на мобилке вровень с тонким инпутом */
-    .attach-btn, .mic-btn, .send-btn {
-        width: 34px; 
+    .attach-btn,
+    .mic-btn,
+    .send-btn {
+        width: 34px;
         height: 34px;
         border-radius: 8px;
         padding: 0;
         margin-bottom: 2px;
     }
-    
+
     .send-btn svg {
         width: 14px;
         height: 14px;
     }
 }
+
+
 
 .theme-light .chat-field {
     background: #f1f5f9;
@@ -1538,9 +1776,8 @@
     border: 1px solid #cbd5e1;
 }
 
-
 .dumSpan {
-
+    /* margin-top: 5px; */
     margin-left: 15px;
     animation: digitalGlow 4s ease-in-out infinite alternate; /* Увеличим время для более плавного эффекта */
     color: #fff; /* Базовый цвет текста для усиления эффекта свечения */
@@ -1585,4 +1822,276 @@
 .theme-light .dumSpan {
     color: #000000;
 
+}
+
+
+
+
+
+
+/* --- СТРОГИЕ РАЗМЕРЫ И АНИМАЦИЯ ПОЯВЛЕНИЯ КАРТИНОК --- */
+.image-wrapper {
+    width: 320px; /* Жёсткая фиксация ширины */
+    height: 320px; /* Жёсткая фиксация высоты */
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 8px;
+    background: rgba(0,0,0,0.05); /* Легкий фон, пока картинка грузится */
+}
+
+.message-attached-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Идеальное заполнение квадрата без искажения пропорций */
+    display: block;
+    animation: imagePopIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    opacity: 0;
+    transform: scale(0.85);
+    transform-origin: center center;
+}
+
+@keyframes imagePopIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.85);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* --- АНИМАЦИЯ ГЕНЕРАЦИИ (СКЕЛЕТОН) --- */
+.image-generation-bubble {
+    background-color: transparent !important;
+    padding: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.image-skeleton-loader {
+    width: 320px; /* Размеры совпадают с финальной картинкой */
+    height: 320px;
+    background-color: var(--skeleton-bg, #2a2a35); /* Для тёмной темы. В светлой можно переопределить на #e2e8f0 */
+    border-radius: 12px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.skeleton-icon {
+    color: rgba(255, 255, 255, 0.2);
+    animation: iconPulse 2s infinite ease-in-out;
+}
+
+.shimmer-effect {
+    position: absolute;
+    top: 0;
+    left: -150%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.08) 50%,
+        transparent 100%
+    );
+    animation: shimmerSlide 1.8s infinite linear;
+    transform: skewX(-20deg);
+}
+
+@keyframes shimmerSlide {
+    0% { left: -150%; }
+    100% { left: 150%; }
+}
+
+@keyframes iconPulse {
+    0%, 100% { transform: scale(1); opacity: 0.3; }
+    50% { transform: scale(1.1); opacity: 0.6; }
+}
+
+.generation-status-text {
+    font-size: 13px;
+    color: #64748b;
+    margin-top: 10px;
+    font-weight: 500;
+    animation: textBlink 1.5s infinite;
+}
+
+@keyframes textBlink {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+}
+
+/* Переопределение цвета скелетона для светлой темы (если используется селектор theme-light) */
+.theme-light .image-skeleton-loader {
+    background-color: #e2e8f0;
+}
+.theme-light .shimmer-effect {
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.6) 50%, transparent 100%);
+}
+.theme-light .skeleton-icon {
+    color: rgba(0, 0, 0, 0.1);
+}
+
+
+.image-generation-bubble {
+    padding: 0 !important;
+    overflow: hidden;
+}
+
+.image-skeleton-loader {
+    position: relative;
+    width: 280px;
+    height: 280px;
+    border-radius: 16px;
+    overflow: hidden;
+    background: linear-gradient(135deg, #1e293b 0%, #334155 50%, #1e293b 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.theme-light .image-skeleton-loader {
+    background: linear-gradient(135deg, #e2e8f0 0%, #f1f5f9 50%, #e2e8f0 100%);
+}
+
+/* Мягкое пульсирующее сияние на фоне */
+.skeleton-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(99, 102, 241, 0.35) 0%, transparent 60%);
+    transform: translate(-50%, -50%) scale(0.8);
+    animation: glowPulse 2.4s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes glowPulse {
+    0%, 100% {
+        transform: translate(-50%, -50%) scale(0.7);
+        opacity: 0.5;
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.1);
+        opacity: 0.9;
+    }
+}
+
+/* Диагональный шиммер, бегущий по фону */
+.shimmer-effect {
+    position: absolute;
+    top: 0;
+    left: -150%;
+    width: 150%;
+    height: 100%;
+    background: linear-gradient(
+        100deg,
+        transparent 20%,
+        rgba(255, 255, 255, 0.15) 45%,
+        rgba(255, 255, 255, 0.35) 50%,
+        rgba(255, 255, 255, 0.15) 55%,
+        transparent 80%
+    );
+    animation: shimmerMove 2s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes shimmerMove {
+    0% { left: -150%; }
+    100% { left: 150%; }
+}
+
+/* Горизонтальная "сканирующая" линия, как у принтера/сканера */
+.scan-line {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        #6366f1 20%,
+        #a855f7 50%,
+        #6366f1 80%,
+        transparent
+    );
+    box-shadow: 0 0 12px 2px rgba(139, 92, 246, 0.8);
+    animation: scanMove 2.2s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+    pointer-events: none;
+}
+
+@keyframes scanMove {
+    0% { top: 0%; opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { top: 100%; opacity: 0; }
+}
+
+/* Контент по центру: иконка + текст */
+.skeleton-content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.skeleton-icon {
+    color: #a5b4fc;
+    animation: iconFloat 2.4s ease-in-out infinite;
+    filter: drop-shadow(0 0 10px rgba(129, 140, 248, 0.6));
+}
+
+.theme-light .skeleton-icon {
+    color: #6366f1;
+}
+
+@keyframes iconFloat {
+    0%, 100% {
+        transform: translateY(0) scale(1);
+        opacity: 0.85;
+    }
+    50% {
+        transform: translateY(-6px) scale(1.08);
+        opacity: 1;
+    }
+}
+
+.generating-text {
+    font-size: 13px;
+    font-weight: 500;
+    color: #cbd5e1;
+    letter-spacing: 0.3px;
+    display: flex;
+    align-items: center;
+}
+
+.theme-light .generating-text {
+    color: #475569;
+}
+
+/* Анимированные точки после текста "Рисую" */
+.dots span {
+    animation: dotBlink 1.4s infinite;
+    opacity: 0;
+}
+
+.dots span:nth-child(1) { animation-delay: 0s; }
+.dots span:nth-child(2) { animation-delay: 0.2s; }
+.dots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes dotBlink {
+    0%, 20% { opacity: 0; }
+    50% { opacity: 1; }
+    100% { opacity: 0; }
 }

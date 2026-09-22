@@ -8,10 +8,11 @@ import {
     FaRegThumbsUp, FaThumbsUp, FaRegThumbsDown, FaThumbsDown,
     FaVolumeUp, FaVolumeMute, FaPaperclip,
     FaCog,
-    FaPlay, FaPause, FaMusic // <-- Добавили FaMusic
+    FaPlay, FaPause, FaMusic, FaImage, FaDownload
 } from "react-icons/fa";
 import './style.css';
 import zaxar from './Image/zaxar.png';
+// import { Link } from "react-router-dom";
 
 export default function Chat() {
     const [input, setInput] = useState('');
@@ -23,9 +24,16 @@ export default function Chat() {
     const [filePreview, setFilePreview] = useState(null);
     const fileInputRef = useRef(null);
 
-    // Состояния: Настройки и тема
+    // Состояния: Режим генерации и индикатор генерации изображения
+    const [isImageMode, setIsImageMode] = useState(false);
+    const [isImageGenerating, setIsImageGenerating] = useState(false);
+
+    // Состояния: Настройки, тема и меню вложений
     const [theme, setTheme] = useState(() => localStorage.getItem('zaxar_theme') || 'dark');
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+    const [isAttachMenuOpen, setIsAttachMenuOpen] = useState(false);
+
+    const attachMenuRef = useRef(null);
 
     const [chats, setChats] = useState(() => {
         const savedChats = localStorage.getItem('zahar_ai_sessions');
@@ -49,6 +57,17 @@ export default function Chat() {
     const messagesEndRef = useRef(null);
     const audioRef = useRef(null);
 
+    // Закрытие меню вложений при клике вне его области
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (attachMenuRef.current && !attachMenuRef.current.contains(event.target)) {
+                setIsAttachMenuOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
     useEffect(() => {
         localStorage.setItem('zaxar_theme', theme);
     }, [theme]);
@@ -59,7 +78,7 @@ export default function Chat() {
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [chats, activeChatId, isLoading]);
+    }, [chats, activeChatId, isLoading, isImageGenerating]);
 
     useEffect(() => {
         return () => {
@@ -108,6 +127,39 @@ export default function Chat() {
                 setCopiedId(id);
                 setTimeout(() => setCopiedId(null), 1500);
             });
+    };
+
+
+    const handleDownloadImage = async (imageData, fileName = 'zaxar-image.png') => {
+        try {
+            // Если это data URL (base64) — качаем напрямую
+            if (imageData.startsWith('data:')) {
+                const link = document.createElement('a');
+                link.href = imageData;
+                link.download = fileName;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                return;
+            }
+
+            // Если это обычная ссылка (URL) — сначала получаем blob
+            const response = await fetch(imageData);
+            const blob = await response.blob();
+            const blobUrl = URL.createObjectURL(blob);
+
+            const link = document.createElement('a');
+            link.href = blobUrl;
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            URL.revokeObjectURL(blobUrl);
+        } catch (err) {
+            console.error('Ошибка скачивания изображения:', err);
+            alert('Не удалось скачать изображение.');
+        }
     };
 
     const handleFeedback = (msgId, type) => {
@@ -203,7 +255,7 @@ export default function Chat() {
     };
 
     const handleSend = async () => {
-        if ((!input.trim() && !selectedFile) || isLoading) return;
+        if ((!input.trim() && !selectedFile) || isLoading || isImageGenerating) return;
         if (isListening) recognitionRef.current.stop();
 
         const userText = input.trim();
@@ -217,7 +269,6 @@ export default function Chat() {
             feedback: null
         };
 
-        const fileToSend = filePreview;
         clearFile();
 
         setChats(prev => prev.map(chat => {
@@ -230,38 +281,80 @@ export default function Chat() {
             return chat;
         }));
 
-        setIsLoading(true);
+        if (isImageMode) {
+            setIsImageGenerating(true);
+            setIsImageMode(false);
 
-        try {
-            const currentChat = chats.find(c => c.id === activeChatId) || chats[0];
-            const chatHistory = [...currentChat.messages, userMessage].map(msg => ({
-                role: msg.sender === 'ai' ? 'assistant' : 'user',
-                content: msg.text,
-                image: msg.image
-            }));
+            try {
+                const response = await fetch("https://zaxar-backend.onrender.com/api/generate-image", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: userText })
+                });
 
-            const aiData = await askAssistant(chatHistory);
-            const aiMessage = {
-                id: Date.now() + '-ai',
-                sender: 'ai',
-                text: aiData.answer,
-                audioUrl: aiData.audio_url,
-                feedback: null
-            };
+                const data = await response.json();
 
-            setChats(prev => prev.map(chat =>
-                chat.id === activeChatId ? { ...chat, messages: [...chat.messages, aiMessage] } : chat
-            ));
-        } catch (error) {
-            const errorMessage = { id: Date.now() + '-err', sender: 'ai', text: "Произошла ошибка при получении ответа.", audioUrl: null, feedback: null };
-            setChats(prev => prev.map(chat =>
-                chat.id === activeChatId ? { ...chat, messages: [...chat.messages, errorMessage] } : chat
-            ));
-        } finally {
-            setIsLoading(false);
+                if (data.image) {
+                    const aiMessage = {
+                        id: Date.now() + '-img',
+                        sender: 'ai',
+                        text: `Изображение по запросу: "${userText}"`,
+                        image: data.image,
+                        feedback: null
+                    };
+
+                    setChats(prev => prev.map(chat =>
+                        chat.id === activeChatId ? { ...chat, messages: [...chat.messages, aiMessage] } : chat
+                    ));
+                } else {
+                    const errorMessage = { id: Date.now() + '-err', sender: 'ai', text: "Не удалось сгенерировать изображение: " + (data.error || "Внутренняя ошибка сервера"), audioUrl: null, feedback: null };
+                    setChats(prev => prev.map(chat =>
+                        chat.id === activeChatId ? { ...chat, messages: [...chat.messages, errorMessage] } : chat
+                    ));
+                }
+            } catch (error) {
+                console.error("Ошибка сети:", error);
+                const errorMessage = { id: Date.now() + '-err', sender: 'ai', text: "Ошибка подключения к серверу генерации изображений.", audioUrl: null, feedback: null };
+                setChats(prev => prev.map(chat =>
+                    chat.id === activeChatId ? { ...chat, messages: [...chat.messages, errorMessage] } : chat
+                ));
+            } finally {
+                setIsImageGenerating(false);
+            }
+
+        } else {
+            setIsLoading(true);
+            try {
+                const currentChat = chats.find(c => c.id === activeChatId) || chats[0];
+                const chatHistory = [...currentChat.messages, userMessage].map(msg => ({
+                    role: msg.sender === 'ai' ? 'assistant' : 'user',
+                    content: msg.text,
+                    image: msg.image
+                }));
+
+                const aiData = await askAssistant(chatHistory);
+                const aiMessage = {
+                    id: Date.now() + '-ai',
+                    sender: 'ai',
+                    text: aiData.answer,
+                    audioUrl: aiData.audio_url,
+                    feedback: null
+                };
+
+                setChats(prev => prev.map(chat =>
+                    chat.id === activeChatId ? { ...chat, messages: [...chat.messages, aiMessage] } : chat
+                ));
+            } catch (error) {
+                const errorMessage = { id: Date.now() + '-err', sender: 'ai', text: "Произошла ошибка при получении ответа от текстовой модели.", audioUrl: null, feedback: null };
+                setChats(prev => prev.map(chat =>
+                    chat.id === activeChatId ? { ...chat, messages: [...chat.messages, errorMessage] } : chat
+                ));
+            } finally {
+                setIsLoading(false);
+            }
         }
     };
-    // --- ЛОГИКА ДЛЯ СВОЕЙ ФОНОВОЙ МУЗЫКИ ---
+
     const [isMusicPlaying, setIsMusicPlaying] = useState(false);
     const [musicFileName, setMusicFileName] = useState('');
     const [musicUrl, setMusicUrl] = useState(null);
@@ -269,12 +362,10 @@ export default function Chat() {
     const musicRef = useRef(null);
     const audioInputRef = useRef(null);
 
-    // Обработчик загрузки файла
     const handleAudioUpload = (e) => {
         const file = e.target.files[0];
         if (!file) return;
 
-        // Очищаем старый URL из памяти браузера, если до этого играл другой трек
         if (musicUrl) {
             URL.revokeObjectURL(musicUrl);
         }
@@ -282,10 +373,9 @@ export default function Chat() {
         const newUrl = URL.createObjectURL(file);
         setMusicUrl(newUrl);
         setMusicFileName(file.name);
-        setIsMusicPlaying(true); // Автоматически включаем после загрузки
+        setIsMusicPlaying(true);
     };
 
-    // Эффект плеера
     useEffect(() => {
         if (musicUrl) {
             if (!musicRef.current) {
@@ -302,7 +392,6 @@ export default function Chat() {
         }
     }, [musicUrl]);
 
-    // Управление паузой/воспроизведением
     useEffect(() => {
         if (!musicRef.current) return;
 
@@ -312,12 +401,10 @@ export default function Chat() {
             musicRef.current.pause();
         }
     }, [isMusicPlaying]);
+
     return (
         <>
-
             <div className={`chat-wrapper ${isSidebarOpen ? 'sidebar-expanded' : 'sidebar-collapsed'} theme-${theme}`}>
-
-                {/* СТРОГО ЦЕНТРИРОВАННОЕ МОДАЛЬНОЕ ОКНО С МУЗЫКОЙ И ЭКВАЛАЙЗЕРОМ */}
                 {isSettingsOpen && (
                     <div className="settings-overlay" onClick={() => setIsSettingsOpen(false)}>
                         <div className="settings-modal" onClick={e => e.stopPropagation()}>
@@ -360,14 +447,13 @@ export default function Chat() {
                                     />
 
                                     <div className="music-block-control" style={{ flexDirection: 'column', gap: '12px', alignItems: 'stretch' }}>
-                                        {/* Кнопка загрузки трека */}
                                         <button
                                             className="theme-picker-btn"
                                             onClick={() => audioInputRef.current.click()}
                                             style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', width: '100%' }}
                                         >
                                             <FaMusic size={12} />
-                                            {musicFileName ? "Выбрать другой файл" : "Загрузить трек с устройство"}
+                                            {musicFileName ? "Выбрать другой файл" : "Загрузить трек с устройства"}
                                         </button>
 
                                         {musicUrl && (
@@ -380,7 +466,6 @@ export default function Chat() {
                                                     <span>{isMusicPlaying ? "Пауза" : "Играть"}</span>
                                                 </button>
 
-                                                {/* ЭКВАЛАЙЗЕР */}
                                                 <div className={`css-equalizer ${isMusicPlaying ? 'active' : ''}`}>
                                                     <span className="eq-bar bar-1"></span>
                                                     <span className="eq-bar bar-2"></span>
@@ -392,14 +477,12 @@ export default function Chat() {
                                         )}
                                     </div>
 
-                                    {/* Вывод имени загруженного трека */}
                                     {musicFileName && (
                                         <span style={{ fontSize: '12px', color: '#64748b', marginTop: '2px', wordBreak: 'break-all', display: 'block' }}>
-                                            ̂ {musicFileName}
+                                            🎵 {musicFileName}
                                         </span>
                                     )}
                                 </div>
-
                             </div>
                         </div>
                     </div>
@@ -456,7 +539,32 @@ export default function Chat() {
                             <div key={msg.id} className={`message-row ${msg.sender}`}>
                                 <div className="message-bubble">
                                     {msg.image && (
-                                        <img src={msg.image} alt="Прикрепленный файл" className="message-attached-img" />
+                                        <div className="image-wrapper" style={{ position: 'relative' }}>
+                                            <img src={msg.image} alt="Сгенерированное или вложенное" className="message-attached-img" />
+                                            {msg.sender === 'ai' && (
+                                                <button
+                                                    className="download-img-btn"
+                                                    onClick={() => handleDownloadImage(msg.image, `zaxar-${msg.id}.png`)}
+                                                    title="Скачать изображение"
+                                                    style={{
+                                                        position: 'absolute',
+                                                        top: '8px',
+                                                        right: '8px',
+                                                        background: 'rgba(0,0,0,0.6)',
+                                                        border: 'none',
+                                                        borderRadius: '8px',
+                                                        padding: '8px',
+                                                        cursor: 'pointer',
+                                                        color: '#fff',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center'
+                                                    }}
+                                                >
+                                                    <FaDownload size={14} />
+                                                </button>
+                                            )}
+                                        </div>
                                     )}
                                     {msg.text && <p>{msg.text}</p>}
 
@@ -480,7 +588,6 @@ export default function Chat() {
                                                 </button>
                                             </>
                                         )}
-
                                         <button className="action-msg-btn copy-btn" onClick={() => handleCopy(msg.text, msg.id)} title="Копировать текст">
                                             {copiedId === msg.id ? <FaCheck size={11} color="#22c55e" /> : <FaRegCopy size={11} />}
                                         </button>
@@ -489,15 +596,33 @@ export default function Chat() {
                             </div>
                         ))}
 
+                        {/* Индикатор стандартной загрузки */}
                         {isLoading && (
                             <div className="message-row ai">
-
-                                    <img className='dumAI' src={zaxar} alt="" />
-                                   <span className='dumSpan'>пожалуйста подождите ищу в интернете</span>
-
-
+                                <img className='dumAI' src={zaxar} alt="" />
+                                <span className='dumSpan'>пожалуйста подождите, думаю...</span>
                             </div>
                         )}
+
+                        {/* Анимированный лоадер при генерации картинки */}
+                        {isImageGenerating && (
+                            <div className="message-row ai">
+                                <div className="message-bubble image-generation-bubble">
+                                    <div className="image-skeleton-loader">
+                                        <div className="shimmer-effect"></div>
+                                        <div className="scan-line"></div>
+                                        <div className="skeleton-glow"></div>
+                                        <div className="skeleton-content">
+                                            <FaImage className="skeleton-icon" size={32} />
+                                            <span className="generating-text">
+                                                Рисую<span className="dots"><span>.</span><span>.</span><span>.</span></span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
                         <div ref={messagesEndRef} />
                         <p className='pzax'>Захар — это искусственный интеллект, и ему свойственно ошибаться. Проверяйте важные данные.</p>
                     </div>
@@ -515,9 +640,71 @@ export default function Chat() {
                         )}
 
                         <div className="chat-input-area">
-                            <button className="attach-btn" onClick={() => fileInputRef.current.click()} title="Прикрепить файл">
-                                <FaPaperclip size={16} />
-                            </button>
+                            <div className="attachment-container" ref={attachMenuRef} style={{ position: 'relative', display: 'flex' }}>
+                                <button
+                                    className="attach-btn"
+                                    onClick={() => setIsAttachMenuOpen(!isAttachMenuOpen)}
+                                    title="Вложения"
+                                >
+                                    <FaPlus size={16} style={{
+                                        transform: isAttachMenuOpen ? 'rotate(45deg)' : 'none',
+                                        transition: 'transform 0.2s ease'
+                                    }} />
+                                </button>
+
+                                {isAttachMenuOpen && (
+                                    <div className="attach-dropdown-menu" style={{
+                                        position: 'absolute',
+                                        bottom: 'calc(100% + 15px)',
+                                        left: '0',
+                                        backgroundColor: theme === 'dark' ? '#1e293b' : '#ffffff',
+                                        border: theme === 'dark' ? '1px solid #334155' : '1px solid #e2e8f0',
+                                        borderRadius: '12px',
+                                        padding: '8px',
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        gap: '4px',
+                                        boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)',
+                                        zIndex: 100,
+                                        minWidth: '220px'
+                                    }}>
+                                        <button
+                                            onClick={() => {
+                                                fileInputRef.current.click();
+                                                setIsAttachMenuOpen(false);
+                                            }}
+                                            style={{
+                                                padding: '10px 12px', textAlign: 'left', background: 'transparent',
+                                                border: 'none', color: theme === 'dark' ? '#f1f5f9' : '#0f172a',
+                                                cursor: 'pointer', borderRadius: '8px', fontSize: '14px',
+                                                transition: 'background 0.2s'
+                                            }}
+                                            onMouseOver={(e) => e.target.style.backgroundColor = theme === 'dark' ? '#334155' : '#f1f5f9'}
+                                            onMouseOut={(e) => e.target.style.backgroundColor = 'transparent'}
+                                        >
+                                            Добавить фото
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                setIsImageMode(!isImageMode);
+                                                setIsAttachMenuOpen(false);
+                                            }}
+                                            style={{
+                                                padding: '10px 12px', textAlign: 'left', background: 'transparent',
+                                                border: 'none', color: isImageMode ? '#ef4444' : (theme === 'dark' ? '#f1f5f9' : '#0f172a'),
+                                                cursor: 'pointer', borderRadius: '8px', fontSize: '14px',
+                                                transition: 'background 0.2s',
+                                                fontWeight: isImageMode ? 'bold' : 'normal'
+                                            }}
+                                            onMouseOver={(e) => e.target.style.backgroundColor = theme === 'dark' ? '#334155' : '#f1f5f9'}
+                                            onMouseOut={(e) => e.target.style.backgroundColor = 'transparent'}
+                                        >
+                                            {isImageMode ? "Отменить генерацию" : "Сгенерировать изображение"}
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+
                             <input
                                 type="file"
                                 ref={fileInputRef}
@@ -526,23 +713,20 @@ export default function Chat() {
                                 accept="image/*"
                             />
 
-                             <textarea
+                            <textarea
                                 className="chat-field"
                                 value={input}
+                                placeholder={isImageMode ? "Опишите, что нужно нарисовать..." : "Введите сообщение..."}
                                 onChange={(e) => setInput(e.target.value)}
                                 onKeyDown={(e) => {
-                                   
                                     if (e.key === 'Enter' && !e.shiftKey) {
                                         e.preventDefault();
                                         handleSend();
                                     }
                                 }}
-                                placeholder={isListening ? "Слушаю вас..." : "Напишите сообщение..."}
-                                disabled={isLoading}
-                                rows={1}
                             />
 
-
+                            {/* <div className="input-actions-right"> */}
                             <button onClick={toggleListening} disabled={isLoading} className={`mic-btn ${isListening ? 'listening' : ''}`}>
                                 {isListening ? <FaStop size={16} /> : <FaMicrophone size={16} />}
                             </button>
@@ -550,11 +734,11 @@ export default function Chat() {
                             <button className="send-btn" onClick={handleSend} disabled={isLoading || (!input.trim() && !selectedFile)}>
                                 <GoPaperAirplane size={18} />
                             </button>
+                            {/* </div> */}
                         </div>
                     </div>
                 </div>
             </div>
-
         </>
     );
 }

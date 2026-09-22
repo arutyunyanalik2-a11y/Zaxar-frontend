@@ -1,0 +1,421 @@
+/* ==========================================
+   ОСНОВНОЙ КОНТЕЙНЕР И ФОН
+   ========================================== */
+   .billing-container {
+    min-height: 100vh;
+    background-color: #050505; /* Сделали глубокий черный для премиальности */
+    color: #ffffff;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    padding: 60px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    overflow-x: hidden; /* Прячем горизонтальный скролл */
+    box-sizing: border-box;
+}
+
+/* Кнопка назад */
+.back-btn {
+    position: absolute;
+    top: 25px;
+    left: 25px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(5px);
+    z-index: 10;
+}
+
+.back-btn:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateX(-3px);
+}
+
+/* ==========================================
+   ГЛАВНАЯ СЕТКА (КАРУСЕЛЬ + КАРТОЧКИ)
+   ========================================== */
+.billing-main-layout {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 1200px;
+    width: 100%;
+    gap: 50px;
+    z-index: 2;
+    margin: 0 auto; /* Центрируем всю конструкцию */
+    flex-wrap: wrap; /* Позволяет элементам переноситься на маленьких экранах */
+}
+
+/* Обертка для правой секции, чтобы карточки и блок восстановления стояли ровно друг под другом */
+.pricing-right-section {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    flex: 1 1 600px; /* Занимает оставшееся место справа */
+    width: 100%;
+    margin-top: 30px;
+}
+
+/* ==========================================
+   ЛЕВАЯ ЧАСТЬ (КАРУСЕЛЬ)
+   ========================================== */
+.billing-left-carousel {
+    flex: 1 1 400px; /* Гибкая ширина, минимум 400px на десктопе */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 20px 0;
+}
+
+.carousel-subtitle {
+    font-size: 18px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: rgba(255, 255, 255, 0.5);
+    margin-bottom: 15px;
+}
+
+.carousel-wrapper {
+    position: relative;
+    height: 140px; /* Даем больше высоты, чтобы ничего не обрезалось */
+    width: 100%;
+}
+
+.carousel-text {
+    font-size: 48px;
+    font-weight: 800;
+    margin: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%; /* Занимает всю ширину левой части */
+    opacity: 0;
+    transform: translateY(30px);
+    transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.5s ease;
+    text-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    line-height: 1.1;
+}
+
+.carousel-text.active {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Финальная фраза ЗАХАР ПЛЮС */
+.carousel-text.special-brand {
+    font-size: 56px;
+    background: linear-gradient(90deg, #ffffff 0%, rgba(255, 157, 0, 1) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 4px 15px rgba(255, 157, 0, 0.4));
+}
+
+/* ==========================================
+   ПРАВАЯ ЧАСТЬ (КАРТОЧКИ ЦЕН)
+   ========================================== */
+.pricing-grid {
+    display: flex;
+    gap: 25px;
+    justify-content: center;
+    width: 100%;
+}
+
+.price-card {
+    background: rgba(20, 20, 25, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 24px;
+    padding: 35px 30px;
+    width: 100%; /* Занимает доступное место */
+    max-width: 320px; /* Но не больше 320px */
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-sizing: border-box;
+    backdrop-filter: blur(12px);
+}
+
+.price-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+/* Карточка PRO */
+.price-card.pro {
+    border: 1px solid rgba(0, 112, 209, 0.8);
+    background: rgba(15, 20, 35, 0.8);
+    animation: pulseGlowMyColors 3s infinite alternate;
+}
+
+@keyframes pulseGlowMyColors {
+    0% {
+        box-shadow: 0 0 15px rgba(0, 112, 209, 0.3);
+        border-color: rgba(0, 112, 209, 0.8);
+    }
+    100% {
+        box-shadow: 0 0 25px rgba(255, 157, 0, 0.3);
+        border-color: rgba(255, 157, 0, 0.8);
+    }
+}
+
+.badge {
+    position: absolute;
+    top: -14px;
+    right: 25px;
+    background: linear-gradient(90deg, rgba(0, 112, 209, 1) 0%, rgba(255, 157, 0, 1) 100%);
+    color: white;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.card-title { font-size: 22px; font-weight: 700; margin-bottom: 10px; }
+.card-price { font-size: 36px; font-weight: 800; margin: 15px 0 25px 0; display: flex; align-items: baseline; }
+.card-price span { font-size: 16px; color: rgba(255, 255, 255, 0.5); font-weight: 400; margin-left: 5px; }
+
+.features-list { list-style: none; padding: 0; margin: 0 0 20px 0; flex-grow: 1; }
+.features-list li { margin-bottom: 12px; font-size: 15px; color: rgba(255, 255, 255, 0.8); display: flex; align-items: center; gap: 10px; }
+.features-list li::before { content: "✓"; color: rgba(0, 112, 209, 1); font-weight: bold; }
+.pro .features-list li::before { color: rgba(255, 157, 0, 1); }
+
+.action-btn { width: 100%; padding: 14px; border-radius: 14px; border: none; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; background: rgba(255, 255, 255, 0.1); color: white; }
+.action-btn:hover { background: rgba(255, 255, 255, 0.2); }
+.action-btn.pro-btn { background: linear-gradient(90deg, rgba(0, 112, 209, 1) 0%, rgba(255, 157, 0, 1) 100%); box-shadow: 0 4px 15px rgba(0, 112, 209, 0.3); }
+.action-btn.pro-btn:hover { transform: scale(1.02); box-shadow: 0 6px 20px rgba(255, 157, 0, 0.5); }
+
+/* ==========================================
+   БЛОК ВОССТАНОВЛЕНИЯ ПОДПИСКИ ПО EMAIL
+   ========================================== */
+.restore-box {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.restore-trigger-btn {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: underline;
+    transition: color 0.2s ease;
+    padding: 10px 20px;
+}
+
+.restore-trigger-btn:hover {
+    color: #ffffff;
+}
+
+/* Форма ввода Имейла */
+.restore-form {
+    background: rgba(20, 20, 25, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+    padding: 24px;
+    width: 100%;
+    max-width: 665px; /* Идеально выравнивается по ширине сетки карт */
+    box-sizing: border-box;
+    text-align: center;
+    backdrop-filter: blur(12px);
+}
+
+.restore-instructions {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 14px;
+    line-height: 1.5;
+    margin-bottom: 18px;
+    margin-top: 0;
+}
+
+/* Группа ввода: Инпут + Кнопка активации */
+.restore-input-group {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+    margin-bottom: 14px;
+}
+
+.restore-email-input {
+    flex: 1;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 14px;
+    padding: 14px 18px;
+    color: #ffffff;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+/* Мягкий неоновый фокус для инпута */
+.restore-email-input:focus {
+    border-color: rgba(0, 112, 209, 0.8);
+    box-shadow: 0 0 12px rgba(0, 112, 209, 0.3);
+}
+
+/* Кнопка "Активировать" */
+.restore-submit-btn {
+    background: #ffffff;
+    color: #000000;
+    border: none;
+    border-radius: 14px;
+    padding: 0 28px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.1s ease;
+    white-space: nowrap;
+}
+
+.restore-submit-btn:hover {
+    background: #e6e6e6;
+}
+
+.restore-submit-btn:active {
+    transform: scale(0.98);
+}
+
+/* Кнопка "Отмена" */
+.restore-cancel-btn {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.3);
+    font-size: 13px;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.restore-cancel-btn:hover {
+    color: #ff453a; /* Наведение подсвечивает красным */
+}
+
+/* Плавное проявление инпута при клике */
+.animate-fade-in {
+    animation: billingFormFadeIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes billingFormFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ==========================================
+   АДАПТИВНОСТЬ (MEDIA QUERIES)
+   Всё на высшем уровне для Apple, Samsung и др.
+   ========================================== */
+
+/* ПЛАНШЕТЫ (iPad) и небольшие ноутбуки (до 1024px) */
+@media (max-width: 1024px) {
+    .billing-main-layout {
+        flex-direction: column;
+        gap: 40px;
+        margin-top: 40px;
+    }
+    
+    .billing-left-carousel {
+        flex: auto;
+        align-items: center;
+        text-align: center;
+        width: 100%;
+        padding: 0;
+    }
+
+    .carousel-text {
+        text-align: center;
+        left: 0;
+    }
+
+    .pricing-right-section {
+        align-items: center;
+    }
+}
+
+/* БОЛЬШИЕ СМАРТФОНЫ (iPhone Pro Max, Samsung Galaxy Ultra, от 480px до 768px) */
+@media (max-width: 768px) {
+    .billing-container {
+        padding: 80px 15px 40px 15px; /* Увеличили отступ сверху для кнопки "Назад" */
+    }
+
+    .pricing-grid {
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        gap: 30px;
+    }
+
+    .price-card {
+        max-width: 380px; /* Разрешаем карточкам стать чуть шире на мобильных */
+    }
+
+    /* Уменьшаем шрифты карусели для телефонов */
+    .carousel-text { font-size: 38px; }
+    .carousel-text.special-brand { font-size: 44px; }
+    .carousel-wrapper { height: 100px; }
+
+    /* Перестраиваем инпут восстановления на мобилках вертикально */
+    .restore-input-group {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .restore-email-input {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .restore-submit-btn {
+        width: 100%;
+        padding: 14px 0; /* Делаем удобную высокую кнопку под нажатие пальцем */
+    }
+    
+    .restore-form {
+        padding: 20px 16px;
+    }
+}
+
+/* СТАНДАРТНЫЕ И МАЛЕНЬКИЕ СМАРТФОНЫ (iPhone SE, 13/14/15, до 430px) */
+@media (max-width: 430px) {
+    .carousel-text { font-size: 32px; }
+    .carousel-text.special-brand { font-size: 38px; }
+    .carousel-wrapper { height: 90px; }
+    .carousel-subtitle { font-size: 14px; }
+
+    .card-title { font-size: 20px; }
+    .card-price { font-size: 32px; }
+    .price-card { padding: 25px 20px; }
+    
+    .back-btn {
+        top: 15px;
+        left: 15px;
+        font-size: 14px;
+        padding: 6px 12px;
+    }
+
+    .restore-trigger-btn {
+        font-size: 13px;
+    }
+}

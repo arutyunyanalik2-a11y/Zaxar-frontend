@@ -19,7 +19,7 @@ export async function askAssistant(userMessage) {
     } catch (error) {
         console.error("Ошибка при связи с ассистентом:", error);
         return {
-            answer: "Ошибка связи с сервером. Проверь, запущен ли Python!",
+            answer: "Ошибка связи с сервером. Пожалуйста, попробуйте позже.",
             audio_url: null
         };
     }
