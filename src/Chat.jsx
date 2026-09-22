@@ -671,13 +671,136 @@ export default function Chat() {
                         <p className='pzax'>Захар — это искусственный интеллект, и ему свойственно ошибаться. Проверяйте важные данные.</p>
                     </div>
 
+                    <div className="chat-messages-area">
+                        {Array.isArray(messages) && messages.map((msg) => {
+                            if (!msg) return null; // Защита от пустых элементов массива
+
+                            return (
+                                <div key={msg.id || Math.random()} className={`message-row ${msg.sender || ''}`}>
+                                    <div className="message-bubble">
+                                        {msg.image && (
+                                            <div className="image-wrapper" style={{ position: 'relative', minHeight: '100px' }}>
+                                                {/* Безопасный рендер изображения с защитой от падения */}
+                                                <img
+                                                    src={msg.image}
+                                                    alt="Сгенерированное или вложенное"
+                                                    className="message-attached-img"
+                                                    loading="lazy"
+                                                    onError={(e) => {
+                                                        e.target.onerror = null;
+                                                        e.target.style.display = 'none';
+                                                        if (e.target.parentNode) {
+                                                            const errDiv = document.createElement('div');
+                                                            errDiv.style.cssText = 'color: #ef4444; padding: 10px; font-size: 13px; border: 1px dashed #ef4444; border-radius: 8px; margin-bottom: 8px;';
+                                                            errDiv.innerText = '⚠️ Не удалось отобразить изображение';
+                                                            e.target.parentNode.appendChild(errDiv);
+                                                        }
+                                                    }}
+                                                />
+                                                {msg.sender === 'ai' && (
+                                                    <button
+                                                        className="download-img-btn"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            try {
+                                                                if (typeof handleDownloadImage === 'function') {
+                                                                    handleDownloadImage(msg.image, `zaxar-${msg.id}.png`);
+                                                                }
+                                                            } catch (err) {
+                                                                console.error("Ошибка при скачивании:", err);
+                                                            }
+                                                        }}
+                                                        title="Скачать изображение"
+                                                        style={{
+                                                            position: 'absolute',
+                                                            top: '8px',
+                                                            right: '8px',
+                                                            background: 'rgba(0,0,0,0.6)',
+                                                            border: 'none',
+                                                            borderRadius: '8px',
+                                                            padding: '8px',
+                                                            cursor: 'pointer',
+                                                            color: '#fff',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                            zIndex: 10
+                                                        }}
+                                                    >
+                                                        <FaDownload size={14} />
+                                                    </button>
+                                                )}
+                                            </div>
+                                        )}
+                                        {msg.text && <p>{msg.text}</p>}
+
+                                        <div className="message-actions-bar">
+                                            {msg.sender === 'ai' && (
+                                                <>
+                                                    <button
+                                                        className={`action-msg-btn voice-btn ${playingId === msg.id ? 'active-voice' : ''}`}
+                                                        onClick={() => toggleVoice && toggleVoice(msg.audioUrl, msg.id)}
+                                                        disabled={!msg.audioUrl}
+                                                        title={playingId === msg.id ? "Остановить" : "Прослушать голос"}
+                                                    >
+                                                        {playingId === msg.id ? <FaVolumeMute size={13} color="#eab308" /> : <FaVolumeUp size={13} />}
+                                                    </button>
+
+                                                    <button className={`action-msg-btn ${msg.feedback === 'like' ? 'active-like' : ''}`} onClick={() => handleFeedback && handleFeedback(msg.id, 'like')} title="Полезный ответ">
+                                                        {msg.feedback === 'like' ? <FaThumbsUp size={11} /> : <FaRegThumbsUp size={11} />}
+                                                    </button>
+                                                    <button className={`action-msg-btn ${msg.feedback === 'dislike' ? 'active-dislike' : ''}`} onClick={() => handleFeedback && handleFeedback(msg.id, 'dislike')} title="Плохой ответ">
+                                                        {msg.feedback === 'dislike' ? <FaThumbsDown size={11} /> : <FaRegThumbsDown size={11} />}
+                                                    </button>
+                                                </>
+                                            )}
+                                            <button className="action-msg-btn copy-btn" onClick={() => handleCopy && handleCopy(msg.text, msg.id)} title="Копировать текст">
+                                                {copiedId === msg.id ? <FaCheck size={11} color="#22c55e" /> : <FaRegCopy size={11} />}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+
+                        {/* Индикатор стандартной загрузки */}
+                        {isLoading && (
+                            <div className="message-row ai">
+                                <img className='dumAI' src={zaxar} alt="" />
+                                <span className='dumSpan'>пожалуйста подождите, думаю...</span>
+                            </div>
+                        )}
+
+                        {/* Анимированный лоадер при генерации картинки */}
+                        {isImageGenerating && (
+                            <div className="message-row ai">
+                                <div className="message-bubble image-generation-bubble">
+                                    <div className="image-skeleton-loader">
+                                        <div className="shimmer-effect"></div>
+                                        <div className="scan-line"></div>
+                                        <div className="skeleton-glow"></div>
+                                        <div className="skeleton-content">
+                                            <FaImage className="skeleton-icon" size={32} />
+                                            <span className="generating-text">
+                                                Рисую<span className="dots"><span>.</span><span>.</span><span>.</span></span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        <div ref={messagesEndRef} />
+                        <p className='pzax'>Захар — это искусственный интеллект, и ему свойственно ошибаться. Проверяйте важные данные.</p>
+                    </div>
+
                     <div className="input-container-wrapper">
                         {filePreview && (
                             <div className="file-preview-box">
-                                {selectedFile?.type.startsWith('image/') ? (
+                                {selectedFile?.type?.startsWith('image/') ? (
                                     <img src={filePreview} alt="Превью" className="preview-img-thumb" />
                                 ) : (
-                                    <span className="preview-file-name">{selectedFile?.name}</span>
+                                    <span className="preview-file-name">{selectedFile?.name || 'Файл'}</span>
                                 )}
                                 <button onClick={clearFile} className="remove-file-btn"><FaTimes size={12} /></button>
                             </div>
@@ -714,7 +837,7 @@ export default function Chat() {
                                     }}>
                                         <button
                                             onClick={() => {
-                                                fileInputRef.current.click();
+                                                if (fileInputRef.current) fileInputRef.current.click();
                                                 setIsAttachMenuOpen(false);
                                             }}
                                             style={{
@@ -759,7 +882,7 @@ export default function Chat() {
 
                             <textarea
                                 className="chat-field"
-                                value={input}
+                                value={input || ''}
                                 placeholder={isImageMode ? "Опишите, что нужно нарисовать..." : "Введите сообщение..."}
                                 onChange={(e) => setInput(e.target.value)}
                                 onKeyDown={(e) => {
@@ -781,7 +904,7 @@ export default function Chat() {
                             <button
                                 className="send-btn"
                                 onClick={handleSend}
-                                disabled={isLoading || isImageGenerating || (!input.trim() && !selectedFile)}
+                                disabled={isLoading || isImageGenerating || (!input?.trim() && !selectedFile)}
                             >
                                 <GoPaperAirplane size={18} />
                             </button>
