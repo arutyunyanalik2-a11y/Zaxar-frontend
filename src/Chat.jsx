@@ -129,7 +129,6 @@ export default function Chat() {
             });
     };
 
-
     const handleDownloadImage = async (imageData, fileName = 'zaxar-image.png') => {
         try {
             // Если это data URL (base64) — качаем напрямую
@@ -294,7 +293,18 @@ export default function Chat() {
 
                 const data = await response.json();
 
-                if (data.image) {
+                if (!response.ok || !data.image) {
+                    const errorMessage = {
+                        id: Date.now() + '-err',
+                        sender: 'ai',
+                        text: "Не удалось сгенерировать изображение: " + (data.error || "Внутренняя ошибка сервера"),
+                        audioUrl: null,
+                        feedback: null
+                    };
+                    setChats(prev => prev.map(chat =>
+                        chat.id === activeChatId ? { ...chat, messages: [...chat.messages, errorMessage] } : chat
+                    ));
+                } else {
                     const aiMessage = {
                         id: Date.now() + '-img',
                         sender: 'ai',
@@ -302,26 +312,25 @@ export default function Chat() {
                         image: data.image,
                         feedback: null
                     };
-
                     setChats(prev => prev.map(chat =>
                         chat.id === activeChatId ? { ...chat, messages: [...chat.messages, aiMessage] } : chat
-                    ));
-                } else {
-                    const errorMessage = { id: Date.now() + '-err', sender: 'ai', text: "Не удалось сгенерировать изображение: " + (data.error || "Внутренняя ошибка сервера"), audioUrl: null, feedback: null };
-                    setChats(prev => prev.map(chat =>
-                        chat.id === activeChatId ? { ...chat, messages: [...chat.messages, errorMessage] } : chat
                     ));
                 }
             } catch (error) {
                 console.error("Ошибка сети:", error);
-                const errorMessage = { id: Date.now() + '-err', sender: 'ai', text: "Ошибка подключения к серверу генерации изображений.", audioUrl: null, feedback: null };
+                const errorMessage = {
+                    id: Date.now() + '-err',
+                    sender: 'ai',
+                    text: "Ошибка подключения к серверу генерации изображений.",
+                    audioUrl: null,
+                    feedback: null
+                };
                 setChats(prev => prev.map(chat =>
                     chat.id === activeChatId ? { ...chat, messages: [...chat.messages, errorMessage] } : chat
                 ));
             } finally {
                 setIsImageGenerating(false);
             }
-
         } else {
             setIsLoading(true);
             try {
@@ -374,6 +383,9 @@ export default function Chat() {
         setMusicUrl(newUrl);
         setMusicFileName(file.name);
         setIsMusicPlaying(true);
+
+        // сбрасываем value, чтобы повторный выбор того же файла тоже сработал
+        if (audioInputRef.current) audioInputRef.current.value = "";
     };
 
     useEffect(() => {
@@ -401,6 +413,14 @@ export default function Chat() {
             musicRef.current.pause();
         }
     }, [isMusicPlaying]);
+
+    // Останавливаем и освобождаем фоновую музыку при размонтировании компонента
+    useEffect(() => {
+        return () => {
+            if (musicRef.current) musicRef.current.pause();
+            if (musicUrl) URL.revokeObjectURL(musicUrl);
+        };
+    }, [musicUrl]);
 
     return (
         <>
@@ -726,15 +746,21 @@ export default function Chat() {
                                 }}
                             />
 
-                            {/* <div className="input-actions-right"> */}
-                            <button onClick={toggleListening} disabled={isLoading} className={`mic-btn ${isListening ? 'listening' : ''}`}>
+                            <button
+                                onClick={toggleListening}
+                                disabled={isLoading || isImageGenerating}
+                                className={`mic-btn ${isListening ? 'listening' : ''}`}
+                            >
                                 {isListening ? <FaStop size={16} /> : <FaMicrophone size={16} />}
                             </button>
 
-                            <button className="send-btn" onClick={handleSend} disabled={isLoading || (!input.trim() && !selectedFile)}>
+                            <button
+                                className="send-btn"
+                                onClick={handleSend}
+                                disabled={isLoading || isImageGenerating || (!input.trim() && !selectedFile)}
+                            >
                                 <GoPaperAirplane size={18} />
                             </button>
-                            {/* </div> */}
                         </div>
                     </div>
                 </div>
