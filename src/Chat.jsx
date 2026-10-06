@@ -14,6 +14,7 @@ import './style.css';
 import zaxar from './Image/zaxar.png';
 // import { Link } from "react-router-dom";
 
+
 export default function Chat() {
     const [input, setInput] = useState('');
     const [copiedId, setCopiedId] = useState(null);
